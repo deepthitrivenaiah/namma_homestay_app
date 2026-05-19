@@ -1,0 +1,9 @@
+{
+  "name": "Namma-HomeStay",
+  "description": "A simplified host portal for rural coastal homestays to manage their profile, menu, and inquiries.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": []
+}

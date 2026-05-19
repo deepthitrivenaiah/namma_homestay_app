@@ -1,0 +1,38 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Default deny
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(homestayId) {
+      return isSignedIn() && get(/databases/$(database)/documents/homestays/$(homestayId)).data.ownerId == request.auth.uid;
+    }
+
+    match /homestays/{homestayId} {
+      allow read: if true;
+      allow create: if isSignedIn() && request.resource.data.ownerId == request.auth.uid;
+      allow update, delete: if isOwner(homestayId);
+    }
+
+    match /menus/{menuId} {
+      allow read: if true;
+      allow write: if isSignedIn() && isOwner(request.resource.data.homestayId);
+    }
+
+    match /inquiries/{inquiryId} {
+      allow create: if true; // Travelers can send messages
+      allow read: if isSignedIn() && isOwner(resource.data.homestayId);
+    }
+
+    match /guides/{guideId} {
+      allow read: if true;
+      allow write: if isSignedIn(); // Simplified for now
+    }
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Namma-HomeStay",
+  "description": "A platform for rural home-stay owners to manage listings, showcase local food, and connect with eco-tourists. Supports host dashboards, image uploads, and food menus.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ],
+  "majorCapabilities": []
+}

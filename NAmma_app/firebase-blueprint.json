@@ -1,0 +1,55 @@
+{
+  "entities": {
+    "Host": {
+      "title": "Host",
+      "description": "A rural home-stay owner profile",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "name": { "type": "string" },
+        "email": { "type": "string" },
+        "phoneNumber": { "type": "string" },
+        "location": { "type": "string" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "name", "email"]
+    },
+    "HomeStay": {
+      "title": "Home-Stay Listing",
+      "description": "Details of a rural home-stay listing",
+      "type": "object",
+      "properties": {
+        "hostId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "pricePerNight": { "type": "number" },
+        "location": { "type": "string" },
+        "roomPhotos": { "type": "array", "items": { "type": "string" } },
+        "surroundingPhotos": { "type": "array", "items": { "type": "string" } },
+        "foodMenu": { 
+          "type": "array", 
+          "items": { 
+            "type": "object",
+            "properties": {
+              "itemName": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          }
+        },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["hostId", "title", "pricePerNight"]
+    }
+  },
+  "firestore": {
+    "hosts/{hostId}": {
+      "schema": "Host",
+      "description": "Host profile information"
+    },
+    "homestays/{homestayId}": {
+      "schema": "HomeStay",
+      "description": "Shared and managed home-stay listings"
+    }
+  }
+}

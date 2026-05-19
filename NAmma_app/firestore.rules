@@ -1,0 +1,74 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    // --- Host Profile Rules ---
+    function isValidHost(data) {
+      return data.keys().hasAll(['uid', 'name', 'email']) 
+        && data.keys().size() <= 6
+        && data.uid is string && data.uid == request.auth.uid
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.email is string && data.email.size() <= 128
+        && (data.get('phoneNumber', '') is string && data.get('phoneNumber', '').size() <= 20)
+        && (data.get('location', '') is string && data.get('location', '').size() <= 200);
+    }
+
+    match /hosts/{hostId} {
+      allow get: if isSignedIn();
+      allow list: if false; // No blanket listing of hosts
+      allow create: if isOwner(hostId) && isValidHost(incoming());
+      allow update: if isOwner(hostId) && isValidHost(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly(['name', 'phoneNumber', 'location']);
+      allow delete: if false; // Profiles are permanent for this app version
+    }
+
+    // --- Home-Stay Listing Rules ---
+    function isValidHomeStay(data) {
+      return data.keys().hasAll(['hostId', 'title', 'pricePerNight'])
+        && data.keys().size() <= 12
+        && data.hostId is string && data.hostId == request.auth.uid
+        && data.title is string && data.title.size() > 0 && data.title.size() <= 200
+        && data.description is string && data.description.size() <= 2000
+        && data.pricePerNight is number && data.pricePerNight > 0
+        && data.location is string && data.location.size() <= 200
+        && data.roomPhotos is list && data.roomPhotos.size() <= 10
+        && data.surroundingPhotos is list && data.surroundingPhotos.size() <= 10
+        && data.foodMenu is list && data.foodMenu.size() <= 20
+        && (data.foodMenu.size() == 0 || (data.foodMenu[0].itemName is string && data.foodMenu[0].itemName.size() <= 100));
+    }
+
+    match /homestays/{homestayId} {
+      allow read: if true; // Publicly viewable
+      allow create: if isSignedIn() && isValidHomeStay(incoming())
+        && exists(/databases/$(database)/documents/hosts/$(request.auth.uid));
+      allow update: if isSignedIn() && isOwner(existing().hostId) && isValidHomeStay(incoming())
+        && incoming().diff(existing()).affectedKeys().hasOnly(['title', 'description', 'pricePerNight', 'location', 'roomPhotos', 'surroundingPhotos', 'foodMenu', 'updatedAt']);
+      allow delete: if isSignedIn() && isOwner(existing().hostId);
+    }
+  }
+}

@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Namma HomeStay</string>
+    <string name="title_dashboard">Explore HomeStays</string>
+    <string name="title_profile">Home Profile</string>
+    <string name="title_menu">Daily Menu</string>
+    <string name="title_inquiry">Inquiry Box</string>
+    <string name="title_guide">Local Guide</string>
+    
+    <string name="label_upload_room">Upload Room Photo</string>
+    <string name="label_upload_toilet">Upload Toilet Photo</string>
+    <string name="label_upload_farm">Upload Farm Photo</string>
+    <string name="label_verification">Verification Checklist</string>
+    
+    <string name="btn_save">Save Changes</string>
+    <string name="btn_call">Call Now</string>
+    <string name="btn_whatsapp">WhatsApp</string>
+</resources>

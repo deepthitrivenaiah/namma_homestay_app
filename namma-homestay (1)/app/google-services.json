@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "123456789012",
+    "firebase_url": "https://ai-studio-applet-webapp-aeb56.firebaseio.com",
+    "project_id": "ai-studio-applet-webapp-aeb56",
+    "storage_bucket": "ai-studio-applet-webapp-aeb56.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:123456789012:android:abcdef123456",
+        "android_client_info": {
+          "package_name": "com.nammahomestay.app"
+        }
+      },
+      "api_key": [
+        {
+          "current_key": "YOUR_API_KEY_HERE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

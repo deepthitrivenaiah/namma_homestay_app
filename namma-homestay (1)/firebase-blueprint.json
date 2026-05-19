@@ -1,0 +1,74 @@
+{
+  "entities": {
+    "HomeStay": {
+      "title": "HomeStay",
+      "description": "Details of a homestay listing",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "location": { "type": "string" },
+        "price": { "type": "string" },
+        "contact": { "type": "string" },
+        "imageUrl": { "type": "string" },
+        "verificationChecklist": { "type": "array", "items": { "type": "string" } },
+        "ownerId": { "type": "string" }
+      },
+      "required": ["name", "location", "price", "contact", "imageUrl"]
+    },
+    "Menu": {
+      "title": "Menu",
+      "description": "Daily food menu for a homestay",
+      "type": "object",
+      "properties": {
+        "homestayId": { "type": "string" },
+        "date": { "type": "string" },
+        "items": { "type": "array", "items": { "type": "string" } },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["homestayId", "items", "updatedAt"]
+    },
+    "Inquiry": {
+      "title": "Inquiry",
+      "description": "Messages from travelers to homestay owners",
+      "type": "object",
+      "properties": {
+        "homestayId": { "type": "string" },
+        "travelerName": { "type": "string" },
+        "message": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" }
+      },
+      "required": ["homestayId", "travelerName", "message", "timestamp"]
+    },
+    "Guide": {
+      "title": "Guide",
+      "description": "Local tourist guide information",
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "category": { "type": "string", "enum": ["Waterfall", "Trekking", "Viewpoint", "Secret Place"] },
+        "description": { "type": "string" },
+        "imageUrl": { "type": "string" }
+      },
+      "required": ["title", "category", "description"]
+    }
+  },
+  "firestore": {
+    "/homestays/{homestayId}": {
+      "schema": "HomeStay",
+      "description": "Collection of homestay listings"
+    },
+    "/menus/{menuId}": {
+      "schema": "Menu",
+      "description": "Daily menu updates"
+    },
+    "/inquiries/{inquiryId}": {
+      "schema": "Inquiry",
+      "description": "Traveler inquiries"
+    },
+    "/guides/{guideId}": {
+      "schema": "Guide",
+      "description": "Local guide entries"
+    }
+  }
+}

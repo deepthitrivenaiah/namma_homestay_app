@@ -1,0 +1,81 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- PRIMITIVES & HELPERS ---
+    function isSignedIn() { return request.auth != null; }
+    function isEmailVerified() { return isSignedIn() && request.auth.token.email_verified == true; }
+    function incoming() { return request.resource.data; }
+    function existing() { return resource.data; }
+    function isValidId(id) { return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); }
+    
+    function isOwner(userId) { return isSignedIn() && request.auth.uid == userId; }
+    
+    // Homestay Validation
+    function isValidHomestay(data) {
+      return data.keys().hasAll(['hostId', 'name', 'pricePerNight']) 
+        && data.hostId == request.auth.uid
+        && data.name is string && data.name.size() > 0 && data.name.size() <= 100
+        && data.pricePerNight is number && data.pricePerNight >= 0
+        && (data.get('description', '') is string && data.get('description', '').size() <= 1000)
+        && (data.get('photos', []).size() <= 10);
+    }
+
+    // Menu Validation
+    function isValidMenu(data) {
+      return data.keys().hasAll(['homestayId', 'date', 'dinnerSpecial'])
+        && data.homestayId is string
+        && data.date is string && data.date.size() <= 20
+        && data.dinnerSpecial is string && data.dinnerSpecial.size() > 0 && data.dinnerSpecial.size() <= 500
+        && (data.get('price', 0) is number)
+        && (data.get('photos', []).size() <= 5);
+    }
+
+    // Inquiry Validation
+    function isValidInquiry(data) {
+      return data.keys().hasAll(['homestayId', 'guestName', 'guestMessage'])
+        && data.homestayId is string
+        && data.guestName is string && data.guestName.size() > 0 && data.guestName.size() <= 100
+        && data.guestMessage is string && data.guestMessage.size() > 0 && data.guestMessage.size() <= 2000
+        && (data.get('status', 'new') in ['new', 'replied', 'closed'])
+        && (data.get('createdAt', request.time) == request.time);
+    }
+
+    // --- COLLECTION RULES ---
+
+    // Homestays
+    match /homestays/{homestayId} {
+      allow read: if true; // Public listings
+      allow create: if isEmailVerified() && isValidId(homestayId) && isValidHomestay(incoming());
+      allow update: if isEmailVerified() && isValidId(homestayId) && isOwner(existing().hostId) 
+                    && isValidHomestay(incoming())
+                    && incoming().hostId == existing().hostId;
+      allow delete: if isEmailVerified() && isOwner(existing().hostId);
+
+      // Menus
+      match /menus/{menuId} {
+        allow read: if true;
+        allow write: if isEmailVerified() && isOwner(get(/databases/$(database)/documents/homestays/$(homestayId)).data.hostId)
+                      && isValidId(menuId) && isValidMenu(incoming());
+      }
+
+      // Inquiries
+      match /inquiries/{inquiryId} {
+        allow read: if isEmailVerified() && isOwner(get(/databases/$(database)/documents/homestays/$(homestayId)).data.hostId);
+        allow create: if isValidId(inquiryId) && isValidInquiry(incoming());
+        allow update: if isEmailVerified() && isOwner(get(/databases/$(database)/documents/homestays/$(homestayId)).data.hostId)
+                      && incoming().diff(existing()).affectedKeys().hasOnly(['status']);
+      }
+    }
+
+    // User profiles
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+      allow write: if isOwner(userId) && incoming().uid == userId;
+    }
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "entities": {
+    "Homestay": {
+      "title": "Homestay",
+      "description": "Details about a specific homestay.",
+      "type": "object",
+      "properties": {
+        "hostId": { "type": "string", "description": "UID of the host user" },
+        "name": { "type": "string", "description": "Name of the homestay" },
+        "description": { "type": "string", "description": "Description of the experience" },
+        "address": { "type": "string", "description": "General location or area" },
+        "pricePerNight": { "type": "number", "description": "Daily rate for stay" },
+        "photos": { "type": "array", "description": "URLs of homestay photos" },
+        "verificationChecklist": {
+          "type": "object",
+          "properties": {
+            "cleanliness": { "type": "boolean" },
+            "privacy": { "type": "boolean" },
+            "localExperience": { "type": "boolean" },
+            "essentialAmenities": { "type": "boolean" }
+          }
+        },
+        "secretSpots": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": { "type": "string" },
+              "description": { "type": "string" },
+              "type": { "type": "string", "enum": ["waterfall", "viewpoint", "trail", "temple", "other"] }
+            }
+          }
+        }
+      },
+      "required": ["hostId", "name", "pricePerNight"]
+    },
+    "Menu": {
+      "title": "Daily Menu",
+      "description": "The special local food offered today.",
+      "type": "object",
+      "properties": {
+        "homestayId": { "type": "string" },
+        "date": { "type": "string", "format": "date" },
+        "dinnerSpecial": { "type": "string" },
+        "price": { "type": "number" },
+        "photos": { "type": "array" }
+      },
+      "required": ["homestayId", "date", "dinnerSpecial"]
+    },
+    "Inquiry": {
+      "title": "Inquiry",
+      "description": "A message from a traveler to a host.",
+      "type": "object",
+      "properties": {
+        "homestayId": { "type": "string" },
+        "guestName": { "type": "string" },
+        "guestMessage": { "type": "string" },
+        "guestPhone": { "type": "string" },
+        "status": { "type": "string", "enum": ["new", "replied", "closed"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["homestayId", "guestName", "guestMessage"]
+    },
+    "User": {
+      "title": "User Profile",
+      "description": "User account information.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "displayName": { "type": "string" },
+        "role": { "type": "string", "enum": ["host", "guest"] }
+      }
+    }
+  },
+  "firestore": {
+    "/homestays": { "schema": "Homestay", "description": "Public list of homestays" },
+    "/homestays/{homestayId}/menus": { "schema": "Menu", "description": "Daily food menu for a homestay" },
+    "/homestays/{homestayId}/inquiries": { "schema": "Inquiry", "description": "Messages for the host" },
+    "/users": { "schema": "User", "description": "User roles and profiles" }
+  }
+}
